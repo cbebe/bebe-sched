@@ -8,3 +8,10 @@
 
 - File `ratings.csv` - include rating for each unit (keeping mine a secret hehe)
 - Environment variable `SCHEDULE_URL` - URL to online schedule
+
+## Building
+
+```bash
+# or run `make`
+go build -ldflags="-X 'main.scheduleURL=$SCHEDULE_URL'"
+```

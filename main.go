@@ -16,14 +16,20 @@ import (
 
 	"github.com/arran4/golang-ical"
 	"github.com/bitfield/script"
+
+	_ "embed"
 )
 
+//go:embed ratings.csv
+var ratings string
+
+//go:embed scrape.js
+var scrapeScript string
+
+var scheduleURL string
+
 func getRatings() (map[string]string, error) {
-	b, err := script.File("./ratings.csv").Bytes()
-	if err != nil {
-		return nil, err
-	}
-	records, err := csv.NewReader(bytes.NewBuffer(b)).ReadAll()
+	records, err := csv.NewReader(bytes.NewBuffer([]byte(ratings))).ReadAll()
 	if err != nil {
 		return nil, err
 
@@ -188,7 +194,7 @@ func jsonToICal(r io.Reader, w io.Writer) error {
 	return cal.SerializeTo(w)
 }
 
-func main() {
+func makeICal() {
 	jsonFile, err := getJSONFile()
 	if err != nil {
 		log.Fatal(err)
@@ -199,4 +205,23 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func main() {
+	if scheduleURL == "" {
+		log.Println("ScheduleURL is not defined")
+		makeICal()
+		return
+	}
+
+	fmt.Println("Opening in browser...")
+	script.Exec(fmt.Sprintf("open %s", scheduleURL))
+	fmt.Println("Log in to the website and paste the JavaScript code into the console.")
+
+	script.Echo(scrapeScript).Exec("pbcopy").Wait()
+
+	fmt.Print("Press enter to continue. ")
+	fmt.Scanln()
+
+	makeICal()
 }
