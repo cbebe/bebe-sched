@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/csv"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -79,8 +80,7 @@ func getJSONFile() (string, error) {
 	}
 	// Assuming this is the right path
 	downloads := path.Join(u, "Downloads")
-	p := script.ListFiles(downloads).MatchRegexp(jsonFileMatch)
-	s, err := p.String()
+	s, err := script.ListFiles(downloads).MatchRegexp(jsonFileMatch).String()
 	if err != nil {
 		return "", err
 	}
@@ -88,12 +88,12 @@ func getJSONFile() (string, error) {
 	switch len(files) {
 	case 0:
 		return "", fmt.Errorf("No files found")
-	case 1:
-		return files[0], nil
 	default:
 		files = files[0 : len(files)-1]
 		slices.Sort(files)
 		slices.Reverse(files)
+		fallthrough
+	case 1:
 		return files[0], nil
 	}
 }
@@ -208,20 +208,25 @@ func makeICal() {
 }
 
 func main() {
+	skip := flag.Bool("skip", false, "Whether to skip opening the browser")
+	flag.Parse()
+
 	if scheduleURL == "" {
 		log.Println("ScheduleURL is not defined")
 		makeICal()
 		return
 	}
 
-	fmt.Println("Opening in browser...")
-	script.Exec(fmt.Sprintf("open %s", scheduleURL))
-	fmt.Println("Log in to the website and paste the JavaScript code into the console.")
+	if !*skip {
+		fmt.Println("Opening in browser...")
+		script.Exec(fmt.Sprintf("open %s", scheduleURL))
+		fmt.Println("Log in to the website and paste the JavaScript code into the console.")
 
-	script.Echo(scrapeScript).Exec("pbcopy").Wait()
+		script.Echo(scrapeScript).Exec("pbcopy").Wait()
 
-	fmt.Print("Press enter to continue. ")
-	fmt.Scanln()
+		fmt.Print("Press enter to continue. ")
+		fmt.Scanln()
+	}
 
 	makeICal()
 }
