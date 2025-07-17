@@ -28,6 +28,7 @@ var ratings string
 var scrapeScript string
 
 var scheduleURL string
+var exportURL string
 
 func getRatings() (map[string]string, error) {
 	records, err := csv.NewReader(bytes.NewBuffer([]byte(ratings))).ReadAll()
@@ -204,6 +205,9 @@ func makeICal() {
 	_, err = script.File(jsonFile).Filter(jsonToICal).WriteFile("bebe.ical")
 	if err != nil {
 		log.Fatal(err)
+	}
+	if exportURL != "" {
+		log.Println("Import the calendar in", exportURL)
 	}
 }
 

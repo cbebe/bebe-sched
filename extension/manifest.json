@@ -1,0 +1,12 @@
+{
+	"manifest_version": 2,
+	"name": "Schedule Downloader",
+	"version": "0.1.0",
+	"description": "Downloads the schedule as an iCal file",
+	"content_scripts": [
+		{
+			"matches": ["*://essedm.albertahealthservices.ca/wfcstatic/applications/navigator/html5/dist/container/index.html*"],
+			"js": ["scrape.js"]
+		}
+	]
+}
